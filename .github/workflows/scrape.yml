@@ -1,9 +1,12 @@
 name: Scrape diario
 
 on:
-  schedule:
-    - cron: '0 12 * * *'   # 12:00 UTC = 09:00 Buenos Aires, todos los días
-  workflow_dispatch:        # permite correrlo a mano desde la pestaña Actions
+  # Cron desactivado: desde la IP de datacenter de GitHub, Instagram bloquea el
+  # scraping. Reactivá esta línea SOLO después de cargar el secret IG_SESSIONID
+  # (Settings → Secrets → Actions). Sin eso, corré el scraper local (ver README).
+  # schedule:
+  #   - cron: '0 12 * * *'   # 12:00 UTC = 09:00 Buenos Aires
+  workflow_dispatch:          # disparo manual desde la pestaña Actions
 
 permissions:
   contents: write           # para commitear data.json / history.json
