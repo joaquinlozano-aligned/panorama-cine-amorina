@@ -36,7 +36,7 @@ async function scrapeOne(page, handle) {
   }));
 
   if (!og || /Profile isn't available/i.test(title)) {
-    return { handle, ok: false };
+    return { handle, ok: false, why: (title || '(sin título)').slice(0, 60) };
   }
 
   // Números redondeados desde el meta tag (robusto, siempre presente).
@@ -61,6 +61,17 @@ const ctx = await browser.newContext({
   locale: 'en-US',
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
 });
+
+// Opcional: si corre desde una IP bloqueada (p. ej. GitHub Actions), una cookie de
+// sesión de Instagram suele destrabar el acceso. Se pasa por la variable IG_SESSIONID
+// (en CI, como secret del repo). Sin ella el scraper funciona igual desde IP residencial.
+if (process.env.IG_SESSIONID) {
+  await ctx.addCookies([{
+    name: 'sessionid', value: process.env.IG_SESSIONID,
+    domain: '.instagram.com', path: '/', httpOnly: true, secure: true,
+  }]);
+  console.log('Usando cookie de sesión (IG_SESSIONID).');
+}
 const page = await ctx.newPage();
 
 const scraped = {};
@@ -68,13 +79,22 @@ for (const a of cfg) {
   try {
     const r = await scrapeOne(page, a.handle);
     scraped[a.handle] = r;
-    console.log(r.ok ? `✓ ${a.handle}: ${r.followers} seg · ${r.posts} posts` : `✗ ${a.handle}: sin datos`);
+    console.log(r.ok ? `✓ ${a.handle}: ${r.followers} seg · ${r.posts} posts` : `✗ ${a.handle}: sin datos${r.why ? ` — ${r.why}` : ''}`);
   } catch (e) {
     scraped[a.handle] = { handle: a.handle, ok: false };
     console.log(`✗ ${a.handle}: ${String(e).slice(0, 80)}`);
   }
 }
 await browser.close();
+
+// Si NINGUNA cuenta devolvió datos, casi seguro es un bloqueo de IP (típico en
+// runners de datacenter). Abortamos sin tocar los archivos para no pisar datos
+// buenos con un snapshot vacío, y dejamos el job en rojo.
+const okCount = Object.values(scraped).filter(s => s.ok).length;
+if (okCount === 0) {
+  console.error('\nERROR: 0/' + cfg.length + ' cuentas con datos. Probable bloqueo de IP de Instagram (¿runner de datacenter? probá IG_SESSIONID o corré desde IP residencial). No se escribe nada.');
+  process.exit(1);
+}
 
 // --- data.json: config editorial + números scrapeados (preserva los previos si falla) ---
 let prev = {};
@@ -110,5 +130,4 @@ history.push({ date: today, followers: snap });
 history.sort((a, b) => a.date.localeCompare(b.date));
 writeFileSync('history.json', JSON.stringify(history, null, 2) + '\n');
 
-const okCount = Object.values(scraped).filter(s => s.ok).length;
 console.log(`\nListo: ${okCount}/${cfg.length} cuentas OK · ${today}`);
