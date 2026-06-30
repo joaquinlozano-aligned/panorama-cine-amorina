@@ -1,0 +1,13 @@
+{
+  "name": "panorama-cine-amorina",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scraper + dashboard del cine independiente porteño en Instagram",
+  "scripts": {
+    "scrape": "node scrape.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

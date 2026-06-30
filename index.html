@@ -132,9 +132,9 @@
     <h1>Panorama del cine independiente porteño en Instagram</h1>
     <p class="sub">Dónde está parada Amorina frente a las salas, cineclubs y cinebars de Buenos Aires. Datos públicos extraídos en vivo, ordenables y filtrables.</p>
     <div class="stamp">
-      <span><b>12</b> cuentas relevadas</span>
+      <span><b id="stamp-count">12</b> cuentas relevadas</span>
       <span><b>Fuente:</b> perfiles públicos de Instagram</span>
-      <span><b>Capturado:</b> 25 jun 2026</span>
+      <span><b>Capturado:</b> <span id="stamp-date">25 jun 2026</span></span>
     </div>
   </div>
 </header>
@@ -208,39 +208,40 @@
 </footer>
 
 <script>
-const DATA = [
-  {name:"Cine Lorca", handle:"@cinelorca", cat:"Sala histórica", followers:57000, posts:1758, following:594, me:false,
-   tag:"Sala de Corrientes", comm:"Cuenta oficial de una sala clásica de Av. Corrientes orientada al #CineArte. Tono institucional-cinéfilo, larga tradición, presencia también en Twitter."},
-  {name:"Sala Leopoldo Lugones", handle:"@sala.lugones", cat:"Sala histórica", followers:40000, posts:1214, following:410, me:false,
-   tag:"Prestigio (desde 1967)", comm:"«El mejor cine del mundo desde 1967». Voz institucional de prestigio, funciones de martes a domingo. Autoridad y patrimonio antes que cercanía."},
-  {name:"Club Lucero", handle:"@clublucerobar", cat:"Bar + Cine", followers:34000, posts:972, following:817, me:false,
-   tag:"Cine + bar + DJs", comm:"Lifestyle nocturno: reservas, DJs y cine en el mismo lugar. Tono de bar de moda más que de sala; el cine es una pata de la experiencia."},
-  {name:"Cine Cosmos UBA", handle:"@cinecosmos.uba", cat:"Sala histórica", followers:33000, posts:741, following:52, me:false,
-   tag:"Público / UBA", comm:"«Un cine con historia y presente en la cultura porteña». De la UBA, accesible, abierto todos los días, descuentos a estudiantes. Tono público y cercano."},
-  {name:"Casa Temple", handle:"@casatemple", cat:"Bar + Cine", followers:31000, posts:763, following:346, me:false,
-   tag:"Bar con cultura", comm:"«Un BAR con historia, 12 años de cultura en Palermo». Franquicia de cervecería con cine al patio. La cultura como gancho del bar."},
-  {name:"Amorina", handle:"@amorinacinebar", cat:"Repertorio / Cinebar", followers:24865, posts:235, following:1, me:true,
-   tag:"Curaduría temática", comm:"Programación semanal curada por TEMA, no por película suelta («semana de detectives, vampiros y conspiranoicos»). Tono cinéfilo + irreverente porteño, sinopsis largas, dobles funciones de autor. Formato Reels. Sigue a 1 sola cuenta y cierra TODO con amorina.club: marca curada y embudo único."},
-  {name:"Cineclub Dynamo", handle:"@dynamocineclub", cat:"Cineclub", followers:8976, posts:1974, following:3044, me:false,
-   tag:"Fílmico / purista", comm:"«Ciclo de proyecciones en material fílmico de grandes obras y rarezas». Purista del celuloide, modelo de socios. Muy prolífico (1.974 posts) pero baja conversión por post."},
-  {name:"Cine Club Núcleo", handle:"@cineclubnucleo", cat:"Cineclub", followers:4157, posts:311, following:33, me:false,
-   tag:"Histórico (INCAA)", comm:"Cineclub histórico en el Espacio INCAA, «Temporada 71». Tono institucional y de servicio: inbox abierto, foco en el socio."},
-  {name:"BAMA Cine Arte", handle:"@bamacine", cat:"Sala histórica", followers:3586, posts:290, following:1745, me:false,
-   tag:"Microcine indie", comm:"Buenos Aires Mon Amour: cine independiente a 50m del Obelisco. Bio utilitaria (dirección, teléfono). Comunicación funcional, poco editorial."},
-  {name:"Club de Cine", handle:"@el.club.de.cine", cat:"Cineclub", followers:1957, posts:40, following:928, me:false,
-   tag:"Encuentro / charla", comm:"El club de @colectivocine: «un espacio de encuentro para ver, charlar y disfrutar cine contemporáneo». Comunidad y conversación, cuenta joven (40 posts)."},
-  {name:"Cinema Club Company", handle:"@cinemaclubcompany", cat:"Evento / Museo", followers:93000, posts:29, following:668, me:false,
-   tag:"Cine al aire libre", comm:"«Más que un cine, una experiencia». Cines al aire libre, modelo de evento: 93K seguidores con 29 posts (impulsado por pauta/eventos). Otra liga, no comparable directo."},
-  {name:"MALBA", handle:"@museomalba", cat:"Evento / Museo", followers:789000, posts:7247, following:2363, me:false,
-   tag:"Museo (contexto)", comm:"Museo con programación de cine, no competidor directo. Incluido como techo de referencia de la escena cultural porteña."},
-];
-DATA.forEach(d=> d.eff = +(d.followers/d.posts).toFixed(0));
+// Fallback embebido: si data.json no carga (p. ej. abierto como archivo local),
+// el dashboard igual muestra el último relevamiento conocido.
+const FALLBACK = {capturedAt:"2026-06-25", accounts:[
+  {name:"Cine Lorca", handle:"cinelorca", cat:"Sala histórica", followers:57000, posts:1758, following:594, me:false, tag:"Sala de Corrientes", comm:"Cuenta oficial de una sala clásica de Av. Corrientes orientada al #CineArte. Tono institucional-cinéfilo, larga tradición."},
+  {name:"Sala Leopoldo Lugones", handle:"sala.lugones", cat:"Sala histórica", followers:40000, posts:1214, following:410, me:false, tag:"Prestigio (desde 1967)", comm:"«El mejor cine del mundo desde 1967». Voz institucional de prestigio, funciones de martes a domingo."},
+  {name:"Club Lucero", handle:"clublucerobar", cat:"Bar + Cine", followers:34000, posts:972, following:817, me:false, tag:"Cine + bar + DJs", comm:"Lifestyle nocturno: reservas, DJs y cine en el mismo lugar. El cine es una pata de la experiencia."},
+  {name:"Cine Cosmos UBA", handle:"cinecosmos.uba", cat:"Sala histórica", followers:33000, posts:741, following:52, me:false, tag:"Público / UBA", comm:"«Un cine con historia y presente en la cultura porteña». De la UBA, accesible, abierto todos los días."},
+  {name:"Casa Temple", handle:"casatemple", cat:"Bar + Cine", followers:31000, posts:763, following:346, me:false, tag:"Bar con cultura", comm:"«Un BAR con historia, 12 años de cultura en Palermo». La cultura como gancho del bar."},
+  {name:"Amorina", handle:"amorinacinebar", cat:"Repertorio / Cinebar", followers:24865, posts:235, following:1, me:true, tag:"Curaduría temática", comm:"Programación semanal curada por TEMA. Tono cinéfilo + irreverente porteño, dobles funciones de autor, Reels. Sigue a 1 sola cuenta y cierra TODO con amorina.club: marca curada y embudo único."},
+  {name:"Cineclub Dynamo", handle:"dynamocineclub", cat:"Cineclub", followers:8976, posts:1974, following:3044, me:false, tag:"Fílmico / purista", comm:"«Ciclo de proyecciones en material fílmico de grandes obras y rarezas». Modelo de socios, muy prolífico pero baja conversión por post."},
+  {name:"Cine Club Núcleo", handle:"cineclubnucleo", cat:"Cineclub", followers:4157, posts:311, following:33, me:false, tag:"Histórico (INCAA)", comm:"Cineclub histórico en el Espacio INCAA, «Temporada 71». Tono institucional y de servicio."},
+  {name:"BAMA Cine Arte", handle:"bamacine", cat:"Sala histórica", followers:3586, posts:290, following:1745, me:false, tag:"Microcine indie", comm:"Buenos Aires Mon Amour: cine independiente a 50m del Obelisco. Comunicación funcional, poco editorial."},
+  {name:"Club de Cine", handle:"el.club.de.cine", cat:"Cineclub", followers:1957, posts:40, following:928, me:false, tag:"Encuentro / charla", comm:"El club de @colectivocine: «un espacio de encuentro para ver, charlar y disfrutar cine contemporáneo». Cuenta joven."},
+  {name:"Cinema Club Company", handle:"cinemaclubcompany", cat:"Evento / Museo", followers:93000, posts:29, following:668, me:false, tag:"Cine al aire libre", comm:"«Más que un cine, una experiencia». Cines al aire libre, modelo de evento (impulsado por pauta). Otra liga, no comparable directo."},
+  {name:"MALBA", handle:"museomalba", cat:"Evento / Museo", followers:789000, posts:7247, following:2363, me:false, tag:"Museo (contexto)", comm:"Museo con programación de cine, no competidor directo. Techo de referencia de la escena cultural porteña."},
+]};
 
-const fmt = n => n>=1000 ? (n/1000).toFixed(n>=10000?0:1).replace('.0','')+"K" : n.toLocaleString('es-AR');
+let DATA = [];
+const fmt = n => n==null ? "—" : (n>=1000 ? (n/1000).toFixed(n>=10000?0:1).replace('.0','')+"K" : n.toLocaleString('es-AR'));
 const rowsEl = document.getElementById('rows');
 const cardsEl = document.getElementById('cards');
-let sortKey='followers', sortDir=-1, filter='all';
-const maxF = Math.max(...DATA.filter(d=>d.cat!=='Evento / Museo'||d.name==='Cinema Club Company').map(d=>d.followers));
+let sortKey='followers', sortDir=-1, filter='all', maxF=1;
+
+function prep(payload){
+  DATA = payload.accounts.map(d=>({...d, eff: d.followers&&d.posts ? +(d.followers/d.posts).toFixed(0) : 0}));
+  maxF = Math.max(...DATA.filter(d=>d.cat!=='Evento / Museo'||d.handle==='cinemaclubcompany').map(d=>d.followers||0));
+  const cnt=document.getElementById('stamp-count'); if(cnt) cnt.textContent=DATA.length;
+  const dt=document.getElementById('stamp-date');
+  if(dt && payload.capturedAt){
+    const [y,m,day]=payload.capturedAt.split('-');
+    const mes=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+m-1];
+    dt.textContent=`${+day} ${mes} ${y}`;
+  }
+}
 
 function render(){
   let list = DATA.filter(d=> filter==='all' || d.cat===filter);
@@ -252,7 +253,7 @@ function render(){
   rowsEl.innerHTML = list.map((d,i)=>`
     <tr class="${d.me?'me':''}">
       <td class="num rank">${i+1}</td>
-      <td><div class="acct"><span class="nm">${d.name}</span><span class="hn">${d.handle}</span></div></td>
+      <td><div class="acct"><span class="nm">${d.name}</span><span class="hn">@${d.handle}</span></div></td>
       <td><span class="cat">${d.cat}</span></td>
       <td class="num barcell"><div class="bar-row"><span class="v">${fmt(d.followers)}</span>
         <span class="bar" style="width:${Math.max(6,d.followers/maxF*120)}px"></span></div></td>
@@ -266,7 +267,7 @@ function renderCards(){
   cardsEl.innerHTML = order.map(d=>`
     <div class="card ${d.me?'me':''}">
       <span class="tag">${d.tag}</span>
-      <h3>${d.name} <span class="hn">${d.handle}</span></h3>
+      <h3>${d.name} <span class="hn">@${d.handle}</span></h3>
       <p>${d.comm}</p>
     </div>`).join('');
 }
@@ -286,7 +287,11 @@ document.getElementById('filters').addEventListener('click',e=>{
   document.querySelectorAll('#filters .chip').forEach(c=>c.setAttribute('aria-pressed', c===b));
   render();
 });
-render(); renderCards();
+// Carga data.json (actualizado a diario por el scraper); si falla, usa el fallback.
+fetch('data.json', {cache:'no-store'})
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .catch(() => FALLBACK)
+  .then(payload => { prep(payload); render(); renderCards(); });
 </script>
 </body>
 </html>
